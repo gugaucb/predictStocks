@@ -30,7 +30,7 @@ public class PoCWeka {
 			FileReader trainreader = new FileReader(filepath);
 			Instances train = new Instances(trainreader);
 			 train.setClassIndex(train.numAttributes() - 1);
-			 MultilayerPerceptron cls = (MultilayerPerceptron) weka.core.SerializationHelper.read("multilayerPerceptron"+System.currentTimeMillis()+".model");
+			// MultilayerPerceptron cls = (MultilayerPerceptron) weka.core.SerializationHelper.read("multilayerPerceptron"+System.currentTimeMillis()+".model");
 			 
 			 // Instance of NN
 			MultilayerPerceptron mlp = new MultilayerPerceptron();
@@ -61,14 +61,15 @@ public class PoCWeka {
 			 * Momentum N = Training Time or Epochs H = Hidden Layers etc.
 			 */
 			mlp.setOptions(Utils.splitOptions("-L 0.1 -M 0.2 -N 2000 -V 0 -S 0 -E 20 -H 6"));
-
+			//salvar model
+			weka.core.SerializationHelper.write("multilayerPerceptron"+System.currentTimeMillis()+".model", mlp);
 			/*
 			 * Neural Classifier Training Validation For evaluation of training
 			 * data,
 			 */
 			System.out.println(" iniciando Evaluation");
-			Evaluation eval = new Evaluation(train);
-			eval.evaluateModel(mlp, train);
+			Evaluation eval = new Evaluation(filteredData);
+			eval.evaluateModel(mlp, filteredData);
 			System.out.println(eval.errorRate()); // Printing Training Mean root
 													// squared Error
 			System.out.println(eval.toSummaryString()); // Summary of Training
@@ -76,8 +77,10 @@ public class PoCWeka {
 			// To apply K-Fold validation
 			int kfolds = 10;
 			System.out.println(" iniciando crossValidateModel");
-			eval.crossValidateModel(mlp, train, kfolds, new Random(1));
+			eval.crossValidateModel(mlp, filteredData, kfolds, new Random(1));
 			System.out.println(" fim crossValidateModel");
+			weka.core.SerializationHelper.write("multilayerPerceptron"+System.currentTimeMillis()+".model", mlp);
+			
 			// Evaluating/Predicting unlabelled data
 			Instances test = new Instances(new BufferedReader(new FileReader(PoCWeka.class.getResource("testDataSetTweet.arff").getPath())));
 			
@@ -113,7 +116,7 @@ public class PoCWeka {
 			writer.flush();
 			writer.close();
 
-			weka.core.SerializationHelper.write("multilayerPerceptron"+System.currentTimeMillis()+".model", mlp);
+		
 			
 			System.out.println(" fim predicteddata");
 		} catch (Exception ex) {

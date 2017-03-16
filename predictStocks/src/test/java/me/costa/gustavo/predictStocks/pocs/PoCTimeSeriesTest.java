@@ -1,13 +1,11 @@
 package me.costa.gustavo.predictStocks.pocs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
 import org.apache.commons.csv.CSVRecord;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 public class PoCTimeSeriesTest {
 

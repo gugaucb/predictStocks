@@ -53,7 +53,7 @@ public class PoCTimeSeries {
 	}
 
 	public static Iterable<CSVRecord> carregarCSV() throws IOException{
-		Reader in = new FileReader("C:\\Desenvolvimento\\lab\\predictStocks\\target\\classes\\ptr4.csv");
+		Reader in = new FileReader("C:\\Users\\Gustavo\\git\\predictStocks\\predictStocks\\target\\classes\\ptr4.csv");
 		Iterable<CSVRecord> records = CSVFormat.newFormat(';').withHeader("Data", "Historico", "Fech", "Var.Dia",
 				"Abertura", "Minimo", "Medio", "Maximo", "Volume", "Negocios").parse(in);
 		return records;

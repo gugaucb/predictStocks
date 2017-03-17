@@ -2,8 +2,10 @@ package me.costa.gustavo.predictStocks.pocs;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
@@ -27,45 +29,26 @@ public class PoCWeka {
 	public static void simpleWekaTrain(String filepath) {
 		try {
 			// Reading training arff or csv file
-			FileReader trainreader = new FileReader(filepath);
-			Instances train = new Instances(trainreader);
-			 train.setClassIndex(train.numAttributes() - 1);
-			 MultilayerPerceptron cls = (MultilayerPerceptron) weka.core.SerializationHelper.read("multilayerPerceptron"+System.currentTimeMillis()+".model");
+			Instances train = carregarDataTrain(filepath);
+			 carregarModelo();
 			 
-			 // Instance of NN
-			MultilayerPerceptron mlp = new MultilayerPerceptron();
-			// Setting Parameters
-			mlp.setLearningRate(0.1);
-			mlp.setMomentum(0.2);
-			mlp.setTrainingTime(2000);
-			mlp.setHiddenLayers("6");
+			 MultilayerPerceptron mlp = criarModelo();
 			
 			
-			StringToWordVector filter = new StringToWordVector();
-
-			// Initialize filter and tell it about the input format.
-            filter.setInputFormat(train);
-            filter.setMinTermFreq(10);
-            filter.setOutputWordCounts(true);
-            filter.setWordsToKeep(1000000);
-            filter.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL, StringToWordVector.TAGS_FILTER));
-			// Generate word counts from the training data.
-			Instances filteredData = Filter.useFilter(train, filter);
-			
-			filteredData.setClassIndex(filteredData.numAttributes()-1);
+			Instances filteredData = filtrarInstances(train);
 			System.out.println(" iniciando buildClassifier");
 			mlp.buildClassifier(filteredData);
 			System.out.println(" fim buildClassifier");
-			/*
-			 * Another Way to set parameters, Where, L = Learning Rate M =
+			
+			 /** Another Way to set parameters, Where, L = Learning Rate M =
 			 * Momentum N = Training Time or Epochs H = Hidden Layers etc.
 			 */
 			mlp.setOptions(Utils.splitOptions("-L 0.1 -M 0.2 -N 2000 -V 0 -S 0 -E 20 -H 6"));
 
-			/*
-			 * Neural Classifier Training Validation For evaluation of training
-			 * data,
-			 */
+			
+			/* * Neural Classifier Training Validation For evaluation of training
+			 * data,*/
+			 
 			System.out.println(" iniciando Evaluation");
 			Evaluation eval = new Evaluation(train);
 			eval.evaluateModel(mlp, train);
@@ -119,5 +102,43 @@ public class PoCWeka {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	private static Instances carregarDataTrain(String filepath) throws FileNotFoundException, IOException {
+		FileReader trainreader = new FileReader(filepath);
+		Instances train = new Instances(trainreader);
+		 train.setClassIndex(train.numAttributes() - 1);
+		return train;
+	}
+
+	private static Instances filtrarInstances(Instances train) throws Exception {
+		StringToWordVector filter = new StringToWordVector();
+
+		// Initialize filter and tell it about the input format.
+		filter.setInputFormat(train);
+		filter.setMinTermFreq(10);
+		filter.setOutputWordCounts(true);
+		filter.setWordsToKeep(1000000);
+		filter.setNormalizeDocLength(new SelectedTag(StringToWordVector.FILTER_NORMALIZE_ALL, StringToWordVector.TAGS_FILTER));
+		// Generate word counts from the training data.
+		Instances filteredData = Filter.useFilter(train, filter);
+		
+		filteredData.setClassIndex(filteredData.numAttributes()-1);
+		return filteredData;
+	}
+
+	private static void carregarModelo() throws Exception {
+		MultilayerPerceptron mlp = (MultilayerPerceptron) weka.core.SerializationHelper.read(PoCWeka.class.getClassLoader().getResource("multilayerPerceptron1489686696365.model").getPath());
+	}
+
+	private static MultilayerPerceptron criarModelo() {
+		// Instance of NN
+		MultilayerPerceptron mlp = new MultilayerPerceptron();
+		// Setting Parameters
+		mlp.setLearningRate(0.1);
+		mlp.setMomentum(0.2);
+		mlp.setTrainingTime(2000);
+		mlp.setHiddenLayers("6");
+		return mlp;
 	}
 }

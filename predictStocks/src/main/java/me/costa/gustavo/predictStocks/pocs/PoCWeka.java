@@ -29,6 +29,7 @@ public class PoCWeka {
 	public static void simpleWekaTrain(String filepath) {
 		try {
 			// Reading training arff or csv file
+
 			Instances train = carregarDataTrain(filepath);
 			 MultilayerPerceptron mlp;
 			Instances filteredData = filtrarInstancesTrain(train);
@@ -36,10 +37,10 @@ public class PoCWeka {
 				mlp = carregarModelo();
 			}catch(Exception e){
 				mlp = criarModelo();
-
 				buildClassifier(filteredData, mlp);
 				salvarModelo(mlp);			
 			}
+
 
 			
 			

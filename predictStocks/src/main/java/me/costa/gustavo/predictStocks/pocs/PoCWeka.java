@@ -38,13 +38,8 @@ public class PoCWeka {
 			}catch(Exception e){
 				mlp = criarModelo();
 				buildClassifier(filteredData, mlp);
-				salvarModelo(mlp);			
+				
 			}
-
-
-			
-			
-
 			/* *//** Another Way to set parameters, Where, L = Learning Rate M =
 			 * Momentum N = Training Time or Epochs H = Hidden Layers etc.
 			 *//*
@@ -54,25 +49,18 @@ public class PoCWeka {
 			/* * Neural Classifier Training Validation For evaluation of training
 			 * data,*/
 			 
-			/*Evaluation eval = executarEvaluation(mlp, filteredData);
-			salvarModelo(mlp);
-			// To apply K-Fold validation
-			executarCrossValidateModel(mlp, filteredData, eval);
-			salvarModelo(mlp);*/
-			// Evaluating/Predicting unlabelled data
-			Instances test = carregarDataTest();
-			
-			
-			Instances datapredict = filtrarTestInstances(test);
-			
-			
+			Evaluation eval = executarEvaluation(mlp, filteredData);
 
 			
-			
-			
+			executarCrossValidateModel(mlp, filteredData, eval);
+
+			// Evaluating/Predicting unlabelled data
+
+			Instances test = carregarDataTest();
+			Instances datapredict = filtrarTestInstances(test);
 			classificarDataTest(mlp, datapredict);
 
-			salvarModelo(mlp);
+			
 			
 			System.out.println(" fim predicteddata");
 		} catch (Exception ex) {
@@ -84,6 +72,7 @@ public class PoCWeka {
 		Instances filteredData = filtrarInstancesTrain(train);
 		mlp.buildClassifier(filteredData);
 		System.out.println(" fim buildClassifier");
+		salvarModelo(mlp);
 		return filteredData;
 	}
 
@@ -105,6 +94,7 @@ public class PoCWeka {
 		// Predict Part
 		for (int i = 0; i < datapredict.numInstances(); i++) {
 			double clsLabel = mlp.classifyInstance(datapredict.instance(i));
+			mlp.distributionForInstance(datapredict.instance(i));
 			predicteddata.instance(i).setClassValue(clsLabel);
 		}
 		// Storing again in arff
@@ -113,6 +103,7 @@ public class PoCWeka {
 		writer.newLine();
 		writer.flush();
 		writer.close();
+		salvarModelo(mlp);
 	}
 
 	private static Instances filtrarTestInstances(Instances test) throws Exception {
@@ -140,6 +131,7 @@ public class PoCWeka {
 		System.out.println(" iniciando crossValidateModel");
 		eval.crossValidateModel(mlp, filteredData, kfolds, new Random(1));
 		System.out.println(" fim crossValidateModel");
+		salvarModelo(mlp);
 	}
 
 	private static Evaluation executarEvaluation(MultilayerPerceptron mlp, Instances filteredData) throws Exception {
@@ -150,6 +142,7 @@ public class PoCWeka {
 												// squared Error
 		System.out.println(eval.toSummaryString()); // Summary of Training
 		System.out.println(" fim Evaluation");
+		salvarModelo(mlp);
 		return eval;
 	}
 
